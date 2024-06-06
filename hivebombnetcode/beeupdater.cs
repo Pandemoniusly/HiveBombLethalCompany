@@ -4,14 +4,27 @@ using RuntimeNetcodeRPCValidator;
 using Unity.Netcode;
 using UnityEngine;
 using Random = System.Random;
+using LethalNetworkAPI;
+using System.Xml.Linq;
+using LethalLib.Modules;
 
 namespace hivebombnetcode
 {
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class beeupdate
     {
-        [SerializeField]
-        public static bool hasupdated = false;
+        public static bool first = false;
+        private static HiveMindManager bossman;
+        [HarmonyPatch(typeof(PlayerControllerB), "Update")]
+        [HarmonyPostfix]
+        private static void UpdatePostfix(PlayerControllerB __instance)
+        {
+            if (!first)
+            {
+                first = true;
+                bossman = ((Component)__instance).GetComponent<HiveMindManager>();
+            }
+        }
         [SerializeField]
         public static bool knockback = false;
         [SerializeField]
@@ -34,7 +47,7 @@ namespace hivebombnetcode
         {
             if (GameNetworkManager.Instance.localPlayerController.isHostPlayerObject)
             {
-                if (Config.Instance.Enabled.Value == true & !hasupdated)
+                if (Config.Instance.Enabled.Value == true)
                 {
 
                     if (__instance.name == "RedLocustHive(Clone)")
@@ -52,7 +65,7 @@ namespace hivebombnetcode
                                 radius = Config.Instance.Radius.Value;
                                 rand = getrandom.Next(50);
                                 where = __instance.itemProperties.positionOffset;
-                                GameNetworkManager.Instance.localPlayerController.GetComponent<HiveMindManager>().servertime(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand,knockback,visible,dmg,radius);
+                                bossman.servertime(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand, knockback, visible, dmg, radius);
                             }
                         }
                         else if (Framecount > 0)
