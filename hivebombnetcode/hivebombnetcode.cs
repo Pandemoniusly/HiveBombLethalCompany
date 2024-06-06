@@ -23,7 +23,7 @@ namespace hivebombnetcode
 
         static internal ManualLogSource mls;
 
-        private NetcodeValidator netcodeValidator;
+        private NetcodeValidator netcodebullshitgo;
 
         public static ConfigFile BepInExConfig()
         {
@@ -33,6 +33,8 @@ namespace hivebombnetcode
         public static AssetBundle bundle;
 
         public GameObject HiveMindPrefabobj;
+
+        public GameObject TheHiveMindIsReal;
 
         public void Awake()
         {
@@ -46,15 +48,13 @@ namespace hivebombnetcode
             HiveMindPrefabobj.AddComponent<HiveMindManager>();
 
             mls = BepInEx.Logging.Logger.CreateLogSource("Pandemonius.BeehiveBomb");
-            netcodeValidator = new NetcodeValidator("Pandemonius.BeehiveBomb");
-            netcodeValidator.PatchAll();
             hivebombnetcode.Config.Instance.Setup();
             mls.LogMessage("Welcome to the HiveMind");
             harmony.PatchAll(typeof(beeupdate));
-            //harmony.PatchAll(typeof(HiveMindInterface));
-            harmony.PatchAll(typeof(HiveCreator));
-
-            netcodeValidator.BindToPreExistingObjectByBehaviour<HiveMindManager, PlayerControllerB>();
+            netcodebullshitgo = new NetcodeValidator("Pandemonius.BeehiveBomb");
+            netcodebullshitgo.PatchAll();
+            netcodebullshitgo.BindToPreExistingObjectByBehaviour<HiveMindManager, PlayerControllerB>();
+            //harmony.PatchAll(typeof(HiveCreator));
         }
 
         //  [HarmonyPatch]
