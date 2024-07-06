@@ -1,9 +1,9 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.9.34902.65
+VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hivebombnetcode", "hivebombnetcode\hivebombnetcode.csproj", "{F8184DC2-BF5C-41CA-B307-2395FB25979D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RpcFixHopefully", "RpcFixHopefully\RpcFixHopefully.csproj", "{3BBA44FF-F67E-4CF5-A75B-F6970928DE59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F8184DC2-BF5C-41CA-B307-2395FB25979D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F8184DC2-BF5C-41CA-B307-2395FB25979D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F8184DC2-BF5C-41CA-B307-2395FB25979D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F8184DC2-BF5C-41CA-B307-2395FB25979D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BBA44FF-F67E-4CF5-A75B-F6970928DE59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BBA44FF-F67E-4CF5-A75B-F6970928DE59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BBA44FF-F67E-4CF5-A75B-F6970928DE59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BBA44FF-F67E-4CF5-A75B-F6970928DE59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {DC31AB64-F9D6-498D-B303-51FE85C8A58A}
+		SolutionGuid = {E7A870C9-26C4-4FEE-A03F-AA79686D6233}
 	EndGlobalSection
 EndGlobal
