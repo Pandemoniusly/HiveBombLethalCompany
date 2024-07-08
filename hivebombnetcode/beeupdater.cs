@@ -3,9 +3,41 @@ using GameNetcodeStuff;
 using Unity.Netcode;
 using UnityEngine;
 using Random = System.Random;
+using System.Collections;
+using UnityEngine.XR;
+using UnityEngine.PlayerLoop;
 
 namespace hivebombnetcode
 {
+    public class SyncConfigs : MonoBehaviour
+    {
+        public static Vector3 where = new Vector3();
+        public static int rand = 0;
+
+        public void Update()
+        {
+            if (hivebombnetcode.Plugin.PauseUntilCoroutine)
+            {
+                StartCoroutine(SendOnceSynced(hivebombnetcode.Plugin.currentObj));
+                hivebombnetcode.Plugin.PauseUntilCoroutine = false;
+            }
+        }
+        public IEnumerator SendOnceSynced(GrabbableObject __instance)
+        {
+            if (Config.Instance.Debug.Value == true) hivebombnetcode.Plugin.mls.LogInfo("Sending ping");
+            ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ConfigPingServerRpc(hivebombnetcode.Config.Instance.KnockbackEnabled.Value, hivebombnetcode.Config.Instance.VisibleExplosions.Value, hivebombnetcode.Config.Instance.Radius.Value, hivebombnetcode.Config.Instance.MaxPlayerDamage.Value);
+
+            yield return new WaitUntil(() => ((hivebombnetcode.Plugin.knockback == Config.Instance.KnockbackEnabled.Value) & (hivebombnetcode.Plugin.visible == Config.Instance.VisibleExplosions.Value) & (hivebombnetcode.Plugin.radius == Config.Instance.Radius.Value) & (hivebombnetcode.Plugin.maxdmg == Config.Instance.MaxPlayerDamage.Value)));
+            if (Config.Instance.Debug.Value == true) hivebombnetcode.Plugin.mls.LogInfo("Configs updated");
+            yield return new WaitForSeconds(0.025f); // hopefully helps guarantee on clients that the config update gets sent before the explosion rpc
+
+            rand = hivebombnetcode.Plugin.getrandom.Next(50);
+            where = __instance.itemProperties.positionOffset;
+            ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ExplodePingServerRpc(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand);
+            if (Config.Instance.Debug.Value == true) hivebombnetcode.Plugin.mls.LogInfo("Exploding in coroutine");
+        }
+    }
+
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class beeupdate
     {
@@ -35,15 +67,19 @@ namespace hivebombnetcode
         public static float radius = 0;
 
         public static int Framecount = 0;
-        public static readonly Random getrandom = new Random();
 
         [HarmonyPatch("Update")]
         [HarmonyPrefix]
         public static void beehiveexplode(GrabbableObject __instance)
         {
-            if ((GameNetworkManager.Instance.localPlayerController == RoundManager.Instance.playersManager.allPlayerObjects[0].GetComponentInChildren<PlayerControllerB>()) & ((NetworkBehaviour)RoundManager.Instance).IsHost)
+            if (((NetworkBehaviour)RoundManager.Instance).IsHost)
             {
-                if (Config.Instance.Enabled.Value == true)
+                if (!hivebombnetcode.Plugin.addedCoroutine)
+                {
+                    RoundManager.Instance.gameObject.AddComponent<SyncConfigs>();
+                    hivebombnetcode.Plugin.addedCoroutine = true;
+                }
+                if ((Config.Instance.Enabled.Value == true) & (hivebombnetcode.Plugin.PauseUntilCoroutine == false))
                 {
                     if (__instance.name == "RedLocustHive(Clone)")
                     {
@@ -52,15 +88,21 @@ namespace hivebombnetcode
                         if (Framecount <= 0)
                         {
                             Framecount = Config.Instance.GlobalExplosionCooldown.Value;
-                            if ((getrandom.Next((int)(800*Config.Instance.RandomnessMult.Value)) <= getrandom.Next(10)))
+                            if ((hivebombnetcode.Plugin.getrandom.Next((int)(800*Config.Instance.RandomnessMult.Value)) <= hivebombnetcode.Plugin.getrandom.Next(10)))
                             {
-                                knockback = Config.Instance.KnockbackEnabled.Value;
-                                visible = Config.Instance.VisibleExplosions.Value;
-                                dmg = Config.Instance.MaxPlayerDamage.Value;
-                                radius = Config.Instance.Radius.Value;
-                                rand = getrandom.Next(50);
-                                where = __instance.itemProperties.positionOffset;
-                                HiveMindManager.Instance.ExplodeAtServerRpc(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand, knockback, visible, dmg, radius);
+                                if ((hivebombnetcode.Plugin.knockback != Config.Instance.KnockbackEnabled.Value) || (hivebombnetcode.Plugin.visible != Config.Instance.VisibleExplosions.Value) || (hivebombnetcode.Plugin.radius != Config.Instance.Radius.Value) || (hivebombnetcode.Plugin.maxdmg != Config.Instance.MaxPlayerDamage.Value))
+                                {
+                                    if (Config.Instance.Debug.Value == true) hivebombnetcode.Plugin.mls.LogInfo("Trying to sync configs");
+                                    hivebombnetcode.Plugin.currentObj = __instance;
+                                    hivebombnetcode.Plugin.PauseUntilCoroutine = true;
+                                }
+                                else
+                                {
+                                    rand = hivebombnetcode.Plugin.getrandom.Next(50);
+                                    where = __instance.itemProperties.positionOffset;
+                                    ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ExplodePingServerRpc(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand);
+                                    if (Config.Instance.Debug.Value == true) Plugin.mls.LogInfo("Exploding");
+                                }
                             }
                         }
                         else if (Framecount > 0)
