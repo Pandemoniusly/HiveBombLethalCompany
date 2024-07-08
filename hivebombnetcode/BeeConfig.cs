@@ -19,6 +19,7 @@ namespace hivebombnetcode
         public ConfigEntry<float> RandomnessMult { get; set; }
         public ConfigEntry<int> MaxPlayerDamage { get; set; }
         public ConfigEntry<int> GlobalExplosionCooldown { get; set; }
+        public new ConfigEntry<bool> Debug { get; set; }
 
         private static Config instance = null;
         public static Config Instance
@@ -42,6 +43,7 @@ namespace hivebombnetcode
             GlobalExplosionCooldown = hivebombnetcode.Plugin.BepInExConfig().Bind("General", "Global Explosion Cooldown", 10, new ConfigDescription("Changes the minimum frames between a beehive exploding after another one already has", new AcceptableValueRange<int>(1, 1000000000)));
             Radius = hivebombnetcode.Plugin.BepInExConfig().Bind("General", "Radius", 2.4f, new ConfigDescription("Explosion radius, Default is 2.4 and is as big as a lightning strikes kill range", new AcceptableValueRange<float>(0.1f, 10f)));
             RandomnessMult = hivebombnetcode.Plugin.BepInExConfig().Bind("General", "Randomness Multiplier", 1f, new ConfigDescription("Markiplies the chance it has to explode each frame, 10 is extremely unlikely and 0.1 is extremely likely", new AcceptableValueRange<float>(0.1f, 10f)));
+            Debug = hivebombnetcode.Plugin.BepInExConfig().Bind("Developer", "Logging", false, "Beats you with a log");
         }
     }
 }
