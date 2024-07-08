@@ -7,11 +7,14 @@ using System.IO;
 using GameNetcodeStuff;
 using UnityEngine;
 using UnityEngine.Assertions;
+using RuntimeNetcodeRPCValidator;
+using System.Collections.Generic;
+using Random = System.Random;
 
 namespace hivebombnetcode
 {
     [BepInPlugin("Pandemonius.BeehiveBomb", "BeehiveBomb", "2.0.0")]
-    //[BepInDependency(RuntimeNetcodeRPCValidator.MyPluginInfo.PLUGIN_GUID, RuntimeNetcodeRPCValidator.MyPluginInfo.PLUGIN_VERSION)]
+    [BepInDependency(RuntimeNetcodeRPCValidator.MyPluginInfo.PLUGIN_GUID, RuntimeNetcodeRPCValidator.MyPluginInfo.PLUGIN_VERSION)]
     //    [BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BaseUnityPlugin
     {
@@ -22,7 +25,7 @@ namespace hivebombnetcode
 
         static internal ManualLogSource mls;
 
-        //private NetcodeValidator netcodebullshitgo;
+        private NetcodeValidator Validator;
 
         public static ConfigFile BepInExConfig()
         {
@@ -34,50 +37,45 @@ namespace hivebombnetcode
         //public GameObject HiveMindPrefabobj;
 
         public GameObject TheHiveMindIsReal;
-        public bool isClient = false;
-        public bool checkedClient = false;
-        public bool enabled = true;
-        public bool knockback = true;
-        public bool visible = true;
-        public float radius = 0f;
-        public float randomness = 0f;
-        public int maxdmg = 0;
-        public int cooldown = 0;
-
+        public static bool islobbyHost = false;
+        public static bool checkedClient = false;
+        public static bool knockback = true;
+        public static bool visible = true;
+        public static float radius = 0f;
+        public static int maxdmg = 0;
+        public float updatetimer = 0;
+        public static bool addedCoroutine = false;
+        public static readonly Random getrandom = new Random();
+        public static bool PauseUntilCoroutine = false;
+        public static GrabbableObject currentObj;
         public void Awake()
         {
             // entry point when mod load
             instance = this;
 
-            //string assetlocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "hivebombing");
-            //bundle = AssetBundle.LoadFromFile(assetlocation);
-            //HiveMindPrefabobj = bundle.LoadAsset<GameObject>("Assets/TheHiveMind.prefab");
-
             mls = BepInEx.Logging.Logger.CreateLogSource("Pandemonius.BeehiveBomb");
             hivebombnetcode.Config.Instance.Setup();
-            mls.LogMessage("Welcome to the HiveMind");
             harmony.PatchAll(typeof(beeupdate));
-            harmony.PatchAll(typeof(NetSpawner));
+            harmony.PatchAll(typeof(CheckOwnership));
+            harmony.PatchAll(typeof(ResetInfo));
 
-            //netcodebullshitgo = new NetcodeValidator("Pandemonius.BeehiveBomb");
-            //netcodebullshitgo.PatchAll();
-            //netcodebullshitgo.BindToPreExistingObjectByBehaviour<HiveMindManager, Terminal>();
-            //harmony.PatchAll(typeof(HiveCreator));
+            Validator = new NetcodeValidator("Pandemonius.BeehiveBomb");
+            Validator.PatchAll();
+
+            Validator.BindToPreExistingObjectByBehaviour<HiveMindManager, RoundManager>();
+            mls.LogMessage("Welcome to the HiveMind");
         }
-        //  [HarmonyPatch]
-        //  public class NetworkObjectManager
-        //  {
-        //
-        //      [HarmonyPostfix, HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Start))]
-        //      public static void Init()
-        //      {
-        //          if (networkPrefab != null)
-        //             return;
-        //          
-        //          networkPrefab = (GameObject)MainAssetBundle.LoadAsset("ExampleNetworkHandler");
-        //      }
-        //
-        //      static GameObject networkPrefab;
-        //  }
+
+        //public void Update()
+        //{
+        //    if ((RoundManager.Instance == null) || (islobbyHost == false) || (checkedClient == false)) return;
+        //    updatetimer += Time.deltaTime;
+        //    if (updatetimer >= 10)
+        //    {
+        //        hivebombnetcode.Plugin.mls.LogInfo("Updating");
+        //        ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ConfigPingServerRpc(hivebombnetcode.Config.Instance.KnockbackEnabled.Value, hivebombnetcode.Config.Instance.VisibleExplosions.Value, hivebombnetcode.Config.Instance.Radius.Value, hivebombnetcode.Config.Instance.MaxPlayerDamage.Value);
+        //        updatetimer = 0;
+        //    }
+        //}
     }
 }
