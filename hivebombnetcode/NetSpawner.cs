@@ -1,3 +1,4 @@
+using GameNetcodeStuff;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -6,36 +7,43 @@ using System.Reflection;
 using System.Text;
 using Unity.Netcode;
 using UnityEngine;
+using Unity;
 
 namespace hivebombnetcode
 {
-    [HarmonyPatch]
-    public class NetSpawner
+    [HarmonyPatch(typeof(PlayerControllerB))]
+    public class CheckOwnership
     {
-        [HarmonyPostfix, HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Start))]
-        public static void Init()
-        {
-            if (networkPrefab != null)
-                return;
-
-            string assetlocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "hivebombing");
-            AssetBundle bundle = AssetBundle.LoadFromFile(assetlocation);
-            networkPrefab = bundle.LoadAsset<GameObject>("Assets/TheHiveMind.prefab");
-            networkPrefab.AddComponent<HiveMindManager>();
-
-            NetworkManager.Singleton.AddNetworkPrefab(networkPrefab);
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.Awake))]
+        [HarmonyPatch("ConnectClientToPlayerObject")]
+        [HarmonyPostfix]
         static void SpawnNetworkHandler()
         {
-            if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
+            try
             {
-                var networkHandlerHost = UnityEngine.Object.Instantiate(networkPrefab, Vector3.zero, Quaternion.identity);
-                networkHandlerHost.GetComponent<NetworkObject>().Spawn();
+                Plugin.checkedClient = true;
+                if (((NetworkBehaviour)StartOfRound.Instance).IsHost)
+                {
+                    Plugin.islobbyHost = true;
+                    if (Config.Instance.Debug.Value == true) Plugin.mls.LogInfo("Im hosting");
+                }
             }
+            catch { }
         }
+    }
 
-        static GameObject networkPrefab;
+    [HarmonyPatch(typeof(StartOfRound))]
+    public class ResetInfo
+    {
+        // Name this whatever you like. It needs to be called exactly once, so 
+        [HarmonyPatch("OnLocalDisconnect")]
+        [HarmonyPostfix]
+        public static void ResetKnownInfo()
+        {
+            hivebombnetcode.Plugin.addedCoroutine = false;
+            hivebombnetcode.Plugin.islobbyHost = false;
+            hivebombnetcode.Plugin.checkedClient = false;
+            if (((Component)RoundManager.Instance).GetComponent<HiveMindManager>()) UnityEngine.Object.Destroy(((Component)RoundManager.Instance).GetComponent<HiveMindManager>());
+            if (Config.Instance.Debug.Value == true) Plugin.mls.LogInfo("Reset");
+        }
     }
 }
