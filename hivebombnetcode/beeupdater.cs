@@ -33,7 +33,7 @@ namespace hivebombnetcode
 
             rand = hivebombnetcode.Plugin.getrandom.Next(50);
             where = __instance.itemProperties.positionOffset;
-            ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ExplodePingServerRpc(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand);
+            ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ExplodePingServerRpc(__instance.NetworkObject.transform.position.x + where.x, __instance.NetworkObject.transform.position.y + where.y, __instance.NetworkObject.transform.position.z + where.z, rand);
             if (Config.Instance.Debug.Value == true) hivebombnetcode.Plugin.mls.LogInfo("Exploding in coroutine");
         }
     }
@@ -100,7 +100,7 @@ namespace hivebombnetcode
                                 {
                                     rand = hivebombnetcode.Plugin.getrandom.Next(50);
                                     where = __instance.itemProperties.positionOffset;
-                                    ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ExplodePingServerRpc(__instance.NetworkObject.transform.position.x, __instance.NetworkObject.transform.position.y, __instance.NetworkObject.transform.position.z, rand);
+                                    ((Component)RoundManager.Instance).GetComponent<HiveMindManager>().ExplodePingServerRpc(__instance.NetworkObject.transform.position.x + where.x, __instance.NetworkObject.transform.position.y + where.y, __instance.NetworkObject.transform.position.z + where.z, rand);
                                     if (Config.Instance.Debug.Value == true) Plugin.mls.LogInfo("Exploding");
                                 }
                             }
